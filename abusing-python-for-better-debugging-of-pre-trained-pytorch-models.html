@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>(Ab)using Python for Better Debbuging of Pre-trained Pytorch Models - NLP & Me</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<style type="text/css">
+
+/*some stuff for output/input prompts*/
+div.cell{border:1px solid transparent;display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;display:flex;flex-direction:column;align-items:stretch}div.cell.selected{border-radius:4px;border:thin #ababab solid}
+div.cell.edit_mode{border-radius:4px;border:thin #008000 solid}
+div.cell{width:100%;padding:5px 5px 5px 0;margin:0;outline:none}
+div.prompt{min-width:11ex;padding:.4em;margin:0;font-family:monospace;text-align:right;line-height:1.21429em}
+@media (max-width:480px){div.prompt{text-align:left}}div.inner_cell{display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;display:flex;flex-direction:column;align-items:stretch;-webkit-box-flex:1;-moz-box-flex:1;box-flex:1;flex:1}
+div.input_area{border:1px solid #cfcfcf;border-radius:4px;background:#f7f7f7;line-height:1.21429em}
+div.prompt:empty{padding-top:0;padding-bottom:0}
+div.input{page-break-inside:avoid;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:horizontal;-moz-box-align:stretch;display:box;box-orient:horizontal;box-align:stretch;}
+div.inner_cell{width:90%;}
+div.input_area{border:1px solid #cfcfcf;border-radius:4px;background:#f7f7f7;}
+div.input_prompt{color:navy;border-top:1px solid transparent;}
+div.output_wrapper{margin-top:5px;position:relative;display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;width:100%;}
+div.output_scroll{height:24em;width:100%;overflow:auto;border-radius:4px;-webkit-box-shadow:inset 0 2px 8px rgba(0, 0, 0, 0.8);-moz-box-shadow:inset 0 2px 8px rgba(0, 0, 0, 0.8);box-shadow:inset 0 2px 8px rgba(0, 0, 0, 0.8);}
+div.output_collapsed{margin:0px;padding:0px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;width:100%;}
+div.out_prompt_overlay{height:100%;padding:0px 0.4em;position:absolute;border-radius:4px;}
+div.out_prompt_overlay:hover{-webkit-box-shadow:inset 0 0 1px #000000;-moz-box-shadow:inset 0 0 1px #000000;box-shadow:inset 0 0 1px #000000;background:rgba(240, 240, 240, 0.5);}
+div.output_prompt{color:darkred;}
+
+a.anchor-link:link{text-decoration:none;padding:0px 20px;visibility:hidden;}
+h1:hover .anchor-link,h2:hover .anchor-link,h3:hover .anchor-link,h4:hover .anchor-link,h5:hover .anchor-link,h6:hover .anchor-link{visibility:visible;}
+/* end stuff for output/input prompts*/
+
+
+.highlight-ipynb .hll { background-color: #ffffcc }
+.highlight-ipynb  { background: #f8f8f8; }
+.highlight-ipynb .c { color: #408080; font-style: italic } /* Comment */
+.highlight-ipynb .err { border: 1px solid #FF0000 } /* Error */
+.highlight-ipynb .k { color: #008000; font-weight: bold } /* Keyword */
+.highlight-ipynb .o { color: #666666 } /* Operator */
+.highlight-ipynb .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.highlight-ipynb .cp { color: #BC7A00 } /* Comment.Preproc */
+.highlight-ipynb .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.highlight-ipynb .cs { color: #408080; font-style: italic } /* Comment.Special */
+.highlight-ipynb .gd { color: #A00000 } /* Generic.Deleted */
+.highlight-ipynb .ge { font-style: italic } /* Generic.Emph */
+.highlight-ipynb .gr { color: #FF0000 } /* Generic.Error */
+.highlight-ipynb .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight-ipynb .gi { color: #00A000 } /* Generic.Inserted */
+.highlight-ipynb .go { color: #888888 } /* Generic.Output */
+.highlight-ipynb .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.highlight-ipynb .gs { font-weight: bold } /* Generic.Strong */
+.highlight-ipynb .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight-ipynb .gt { color: #0044DD } /* Generic.Traceback */
+.highlight-ipynb .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.highlight-ipynb .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.highlight-ipynb .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.highlight-ipynb .kp { color: #008000 } /* Keyword.Pseudo */
+.highlight-ipynb .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.highlight-ipynb .kt { color: #B00040 } /* Keyword.Type */
+.highlight-ipynb .m { color: #666666 } /* Literal.Number */
+.highlight-ipynb .s { color: #BA2121 } /* Literal.String */
+.highlight-ipynb .na { color: #7D9029 } /* Name.Attribute */
+.highlight-ipynb .nb { color: #008000 } /* Name.Builtin */
+.highlight-ipynb .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.highlight-ipynb .no { color: #880000 } /* Name.Constant */
+.highlight-ipynb .nd { color: #AA22FF } /* Name.Decorator */
+.highlight-ipynb .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.highlight-ipynb .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.highlight-ipynb .nf { color: #0000FF } /* Name.Function */
+.highlight-ipynb .nl { color: #A0A000 } /* Name.Label */
+.highlight-ipynb .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.highlight-ipynb .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.highlight-ipynb .nv { color: #19177C } /* Name.Variable */
+.highlight-ipynb .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.highlight-ipynb .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight-ipynb .mf { color: #666666 } /* Literal.Number.Float */
+.highlight-ipynb .mh { color: #666666 } /* Literal.Number.Hex */
+.highlight-ipynb .mi { color: #666666 } /* Literal.Number.Integer */
+.highlight-ipynb .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight-ipynb .sb { color: #BA2121 } /* Literal.String.Backtick */
+.highlight-ipynb .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight-ipynb .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.highlight-ipynb .s2 { color: #BA2121 } /* Literal.String.Double */
+.highlight-ipynb .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.highlight-ipynb .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.highlight-ipynb .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.highlight-ipynb .sx { color: #008000 } /* Literal.String.Other */
+.highlight-ipynb .sr { color: #BB6688 } /* Literal.String.Regex */
+.highlight-ipynb .s1 { color: #BA2121 } /* Literal.String.Single */
+.highlight-ipynb .ss { color: #19177C } /* Literal.String.Symbol */
+.highlight-ipynb .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight-ipynb .vc { color: #19177C } /* Name.Variable.Class */
+.highlight-ipynb .vg { color: #19177C } /* Name.Variable.Global */
+.highlight-ipynb .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight-ipynb .il { color: #666666 } /* Literal.Number.Integer.Long */
+</style>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+div.entry-content {
+  overflow: visible;
+  padding: 8px;
+}
+.input_area {
+  padding: 0.2em;
+}
+
+a.heading-anchor {
+ white-space: normal;
+}
+
+.rendered_html
+code {
+ font-size: .8em;
+}
+
+pre.ipynb {
+  color: black;
+  background: #f7f7f7;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 0;
+  padding: 0;
+  margin: 0px;
+  font-size: 13px;
+}
+
+/* remove the prompt div from text cells */
+div.text_cell .prompt {
+    display: none;
+}
+
+/* remove horizontal padding from text cells, */
+/* so it aligns with outer body text */
+div.text_cell_render {
+    padding: 0.5em 0em;
+}
+
+img.anim_icon{padding:0; border:0; vertical-align:middle; -webkit-box-shadow:none; -box-shadow:none}
+
+div.collapseheader {
+    width=100%;
+    padding: 2px;
+    cursor: pointer;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<script type="text/javascript">
+init_mathjax = function() {
+    if (window.MathJax) {
+        // MathJax loaded
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+            },
+            displayAlign: 'left', // Change this to 'center' to center equations.
+            "HTML-CSS": {
+                styles: {'.MathJax_Display': {"margin": 0}}
+            }
+        });
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+    }
+}
+init_mathjax();
+</script>
+
+<link rel="canonical" href="/abusing-python-for-better-debugging-of-pre-trained-pytorch-models.html">
+
+        <meta name="author" content="Thomas" />
+        <meta name="keywords" content="python,machine learning,data science,neural networks,pytorch" />
+        <meta name="description" content="It can be useful to (ab)use python&#39;s dynamic object model to add functions to existing objects in order to better interrogate and debug a pre-trained pytorch model." />
+
+        <meta property="og:site_name" content="NLP & Me" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="(Ab)using Python for Better Debbuging of Pre-trained Pytorch Models"/>
+        <meta property="og:url" content="/abusing-python-for-better-debugging-of-pre-trained-pytorch-models.html"/>
+        <meta property="og:description" content="It can be useful to (ab)use python&#39;s dynamic object model to add functions to existing objects in order to better interrogate and debug a pre-trained pytorch model."/>
+        <meta property="article:published_time" content="2019-05-11" />
+            <meta property="article:section" content="Blog" />
+            <meta property="article:tag" content="python" />
+            <meta property="article:tag" content="machine learning" />
+            <meta property="article:tag" content="data science" />
+            <meta property="article:tag" content="neural networks" />
+            <meta property="article:tag" content="pytorch" />
+            <meta property="article:author" content="Thomas" />
+
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.readable.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/monokai.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+NLP & Me            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                         <li><a href="/pages/contact.html">
+                             Contact
+                          </a></li>
+                         <li><a href="/pages/publications.html">
+                             Publications
+                          </a></li>
+                         <li><a href="/pages/talks.html">
+                             Talks
+                          </a></li>
+                         <li><a href="/pages/various.html">
+                             Various
+                          </a></li>
+                        <li class="active">
+                            <a href="/category/blog.html">Blog</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+
+<!-- Banner -->
+<!-- End Banner -->
+
+<!-- Content Container -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/abusing-python-for-better-debugging-of-pre-trained-pytorch-models.html"
+                       rel="bookmark"
+                       title="Permalink to (Ab)using Python for Better Debbuging of Pre-trained Pytorch Models">
+                        (Ab)using Python for Better Debbuging of Pre-trained Pytorch Models
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2019-05-11T09:54:00+01:00"> Sat 11 May 2019</time>
+    </span>
+
+
+
+
+
+<span class="label label-default">Tags</span>
+	<a href="/tag/python.html">python</a>
+        /
+	<a href="/tag/machine-learning.html">machine learning</a>
+        /
+	<a href="/tag/data-science.html">data science</a>
+        /
+	<a href="/tag/neural-networks.html">neural networks</a>
+        /
+	<a href="/tag/pytorch.html">pytorch</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p>Building bigger models to achieve better performance is a common theme in current NLP research papers, with many authors releasing their code and/or some pre-trained models. Having access to a pre-trained model is great, because its almost always infeasible to train a model from scratch because one might not have access to the appropriate computing resources or the same data that the original authors used for training their model.</p>
+<p>Thus, we're often re-using and running existing pre-trained models and it becomes increasingly important to understand what they learn and to interrogate any intermediate representations they create in order to get a better feel for whats inside the black box.</p>
+<p>Luckily sharing pre-trained models is relatively easy with current tools such as pytorch or tensorflow. In this post, I'll briefly discuss how its possible to debug an existing pre-trained model by dynamically adding methods to it.</p>
+<p>In pytorch, a pre-trained model is just a python object, so its possible to overwrite and modify existing instance methods by whatever we want to do. </p>
+<p>Lets start with an actual example. For a <a href="">recent paper</a> I have pre-trained a relatively straightforward bidirectional LSTM with max-pooling on the <a href="">SNLI dataset</a>. It generally follows the <a href="">InferSent</a> model architecture, but I use fewer hidden units, thereby trading off some points of accuracy for faster training. Essentially I wasn't interested in +/- 2 points of improvement on a dataset, but whether the model works <em>in principle</em> on my dataset. The pre-trained model achieves 0.83 accuracy on the SNLI dev set and 0.82 on the SNLI test set. Note that the pre-trained model is around 2.5gb, so I can't share it on this site, but feel free to <a href="../pages/contact">get in touch</a> if you need access to the model.</p>
+<p>The code for the model is relatively straightforward (Note, the code for <code>EmbeddingLayer</code>, <code>FeedForward</code> and <code>LSTMEncoder</code> currently resides in a private bitbucket repository alongside the rest of my research code, please <a href="../pages/contact">contact me</a> if you would like to get some of the code):</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">torch.nn.utils.rnn</span> <span class="kn">import</span> <span class="n">pack_padded_sequence</span>
+
+<span class="kn">from</span> <span class="nn">semantx.models.pytorch_layers</span> <span class="kn">import</span> <span class="n">EmbeddingLayer</span> <span class="c1"># wraps an Embedding object</span>
+<span class="kn">from</span> <span class="nn">semantx.models.pytorch_model_factory</span> <span class="kn">import</span> <span class="n">FeedForward</span> <span class="c1"># wraps some basic feedforward layer functionality</span>
+<span class="kn">from</span> <span class="nn">semantx.models.pytorch_model_factory</span> <span class="kn">import</span> <span class="n">LSTMEncoder</span> <span class="c1"># wraps a basic nn.LSTM layer</span>
+
+
+<span class="k">class</span> <span class="nc">NLIEncoderFeedforward</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embedding_config</span><span class="p">,</span> <span class="n">encoder_config</span><span class="p">,</span> <span class="n">aggregation_layer</span><span class="p">,</span> <span class="n">feedforward_config</span><span class="p">,</span> <span class="n">pooling_layer</span><span class="p">,</span>
+                 <span class="n">conditional_encoding</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NLIEncoderFeedforward</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span> <span class="o">=</span> <span class="n">EmbeddingLayer</span><span class="p">(</span><span class="o">**</span><span class="n">embedding_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">LSTMEncoder</span><span class="p">(</span><span class="o">**</span><span class="n">encoder_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pooling</span> <span class="o">=</span> <span class="n">pooling_layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aggregation</span> <span class="o">=</span> <span class="n">aggregation_layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feedforward</span> <span class="o">=</span> <span class="n">FeedForward</span><span class="p">(</span><span class="o">**</span><span class="n">feedforward_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conditional_encoding</span> <span class="o">=</span> <span class="n">conditional_encoding</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="c1"># Embed sequences</span>
+        <span class="n">premise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">premise</span><span class="p">)</span>
+        <span class="n">hypothesis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">hypothesis</span><span class="p">)</span>
+
+        <span class="c1"># Pack embedded sequences</span>
+        <span class="n">premise</span> <span class="o">=</span> <span class="n">pack_padded_sequence</span><span class="p">(</span><span class="n">premise</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">premise_lengths</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">hypothesis</span> <span class="o">=</span> <span class="n">pack_padded_sequence</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">hypothesis_lengths</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c1"># Encode premise &amp; hypothesis</span>
+        <span class="n">premise</span><span class="p">,</span> <span class="p">(</span><span class="n">hidden</span><span class="p">,</span> <span class="n">cell_state</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">premise</span><span class="p">,</span> <span class="n">curr_batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conditional_encoding</span><span class="p">):</span>
+            <span class="n">hypothesis</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">curr_batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">),</span> <span class="n">hidden</span><span class="o">=</span><span class="n">hidden</span><span class="p">,</span> <span class="n">cell_state</span><span class="o">=</span><span class="n">cell_state</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hypothesis</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">curr_batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
+
+        <span class="c1"># The packed sequences are length-sorted, so we need to return them to their original ordering</span>
+        <span class="n">premise</span> <span class="o">=</span> <span class="n">premise</span><span class="p">[</span><span class="n">batch</span><span class="o">.</span><span class="n">premise_orig_idx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+        <span class="n">hypothesis</span> <span class="o">=</span> <span class="n">hypothesis</span><span class="p">[</span><span class="n">batch</span><span class="o">.</span><span class="n">hypothesis_orig_idx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="c1"># Pool premise &amp; hypothesis</span>
+        <span class="n">premise_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling</span><span class="p">(</span><span class="n">premise</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">hypothesis_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c1"># Combine the premise &amp; hypothesis representations</span>
+        <span class="n">ff_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregation</span><span class="p">(</span><span class="n">premise_emb</span><span class="p">,</span> <span class="n">hypothesis_emb</span><span class="p">)</span>
+
+        <span class="c1"># Feedforward classification with the embedded sequences</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feedforward</span><span class="p">(</span><span class="n">ff_input</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">scores</span>
+</pre></div>
+
+
+<p>The model first uses an LSTM to encode the premise and the hypothesis, performs some pooling on the encoded sequences and subsequently aggregates the two representations into a single vector before passing it on to a standard feedforward network that returns the class predictions. Its all nice and good if all we are interested in is the final predictions. However, sometimes we might want to look into the model in order figure out whats going on in intermediate steps, i.e. whats the benefit of using a max pooling layer? Does it learn anything interesting? If we look at the neighbourhood before and after applying pooling, what do we get? Whats the impact of different aggregation functions on the sentence space?</p>
+<p>In order to answer any of these questions we could either get all of that code, download SNLI, try to preprocess it the same way that I did, hope for the best that I have listed all hyperparameters in the paper and then train the model. </p>
+<p>But thats just a big waste of resources, time and sanity. Its much easier to <a href="../pages/contact">contact me</a> and get the actual pre-trained model as well as the vectoriser that converts any input text to embedding indices that go into the model. Then we can just load the model and start hacking it.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">joblib</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;path/to/the/pretrained/model&#39;</span><span class="p">)</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;path/to/the/vectoriser&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Now, lets create two functions that return the premise and the hypothesis before and after the pooling operation, as well as a function that returns aggregated representation (luckily we have the code of the model just above, so all we really need to do is some method definitions with some copy/paste).</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_representations_before_pooling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="c1"># Embed sequences</span>
+    <span class="n">premise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">premise</span><span class="p">)</span>
+    <span class="n">hypothesis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">hypothesis</span><span class="p">)</span>
+
+    <span class="c1"># Pack embedded sequences</span>
+    <span class="n">premise</span> <span class="o">=</span> <span class="n">pack_padded_sequence</span><span class="p">(</span><span class="n">premise</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">premise_lengths</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">hypothesis</span> <span class="o">=</span> <span class="n">pack_padded_sequence</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">hypothesis_lengths</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c1"># Encode premise &amp; hypothesis</span>
+    <span class="n">premise</span><span class="p">,</span> <span class="p">(</span><span class="n">hidden</span><span class="p">,</span> <span class="n">cell_state</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">premise</span><span class="p">,</span> <span class="n">curr_batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conditional_encoding</span><span class="p">):</span>
+        <span class="n">hypothesis</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">curr_batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">),</span> <span class="n">hidden</span><span class="o">=</span><span class="n">hidden</span><span class="p">,</span> <span class="n">cell_state</span><span class="o">=</span><span class="n">cell_state</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hypothesis</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">curr_batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
+
+    <span class="c1"># The packed sequences are length-sorted, so we need to return them to their original ordering</span>
+    <span class="n">premise</span> <span class="o">=</span> <span class="n">premise</span><span class="p">[</span><span class="n">batch</span><span class="o">.</span><span class="n">premise_orig_idx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">hypothesis</span> <span class="o">=</span> <span class="n">hypothesis</span><span class="p">[</span><span class="n">batch</span><span class="o">.</span><span class="n">hypothesis_orig_idx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">premise</span><span class="p">,</span> <span class="n">hypothesis</span>
+
+
+<span class="k">def</span> <span class="nf">get_representations_after_pooling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="n">premise</span><span class="p">,</span> <span class="n">hypothesis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_representations_before_pooling</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+    <span class="c1"># Pool premise &amp; hypothesis</span>
+    <span class="n">premise_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling</span><span class="p">(</span><span class="n">premise</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">hypothesis_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooling</span><span class="p">(</span><span class="n">hypothesis</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">premise_emb</span><span class="p">,</span> <span class="n">hypothesis_emb</span>
+
+
+<span class="k">def</span> <span class="nf">get_aggregated_representations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="n">premise_emb</span><span class="p">,</span> <span class="n">hypothesis_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_representations_after_pooling</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+    <span class="c1"># Combine the premise &amp; hypothesis representations</span>
+    <span class="n">aggr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregation</span><span class="p">(</span><span class="n">premise_emb</span><span class="p">,</span> <span class="n">hypothesis_emb</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">aggr</span>
+</pre></div>
+
+
+<p>Easy peasy, we basically just copy pasted the relevant functionality from the forward function into smaller chunks. Now the last missing bit is dynamically binding these functions to the model object we've loaded above. While this is arguably a bit hacky, its well defined within python by using <code>types</code>.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">types</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">get_representations_before_pooling</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">get_representations_before_pooling</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">get_representations_before_pooling</span><span class="p">)</span>
+
+<span class="c1"># Outputs</span>
+<span class="c1"># &lt;bound method get_representations_before_pooling of NLIEncoderFeedforward(</span>
+<span class="c1">#  (embedding): EmbeddingLayer(</span>
+<span class="c1">#    (word_embeddings): Embedding(2196010, 300)</span>
+<span class="c1">#  )</span>
+<span class="c1">#  (encoder): LSTMEncoder(</span>
+<span class="c1">#    (lstm): LSTM(300, 300, bidirectional=True)</span>
+<span class="c1">#  )</span>
+<span class="c1">#  (pooling): BidirectionalMaxPoolingLayer()</span>
+<span class="c1">#  (aggregation): NLIAggregationLayerBalazs2017()</span>
+<span class="c1">#  (feedforward): FeedForward(</span>
+<span class="c1">#    (forward_layer_1): FeedforwardLayer(</span>
+<span class="c1">#      (feedforward): Sequential(</span>
+<span class="c1">#        (0): Linear(in_features=2400, out_features=2400, bias=True)</span>
+<span class="c1">#        (1): ReLU()</span>
+<span class="c1">#        (2): Dropout(p=0.0)</span>
+<span class="c1">#      )</span>
+<span class="c1">#    )</span>
+<span class="c1">#    (output_layer): Linear(in_features=2400, out_features=3, bias=True)</span>
+<span class="c1">#  )</span>
+<span class="c1">#)&gt;</span>
+<span class="c1"># We just bound the above defined function to a _single_ object instance and we can now just this method as if its always been there! Lets also add the other functions</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">get_representations_after_pooling</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">get_representations_after_pooling</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_aggregated_representations</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">get_aggregated_representations</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Cool stuff! We can now pass in some example sentences with which we'd like to interrogate the model behaviour and thereby gain some more insight into what the model has learnt! For the sake of simplicity, lets pass in two premise-hypothesis pairs and compare the cosines of their representations before and after pooling. For the representation before pooling, we are going to choose the final hidden state.</p>
+<p>The two pairs we're passing in are:</p>
+<ul>
+<li><em>Five men are playing frisbee on the beach</em> <strong>[ENTAILS]</strong> <em>Some people are playing at the seafront</em></li>
+<li><em>Five men are playing frisbee on the beach</em> <strong>[NOT ENTAILS]</strong> <em>A group of women is crossing a busy road</em></li>
+</ul>
+<p>Lets vectorise them and pass them to our new functions (<strong>Note:</strong> this type of interrogation hinges on knowledge of the preprocessing pipeline.)!</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">cosine</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c1"># Create premises and hypotheses</span>
+<span class="n">premises</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Five men are playing frisbee on the beach&#39;</span><span class="p">,</span> <span class="s1">&#39;Five men are playing frisbee on the beach&#39;</span><span class="p">]</span>
+<span class="n">hypotheses</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Some people are playing at the seafront&#39;</span><span class="p">,</span> <span class="s1">&#39;A group of women is crossing a busy road&#39;</span><span class="p">]</span>
+
+<span class="c1"># Check how the SNLI labels are mapped</span>
+<span class="k">print</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])))</span>
+
+<span class="c1"># Output</span>
+<span class="c1"># array([&#39;contradiction&#39;, &#39;entailment&#39;, &#39;neutral&#39;], dtype=&#39;&lt;U13&#39;)</span>
+
+<span class="c1"># So the first example is an entailment, thus the label index is 1, the second one is a contradiction, hence we use 0</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="n">batch</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">batch_transform_nli_padded_sorted</span><span class="p">(</span><span class="n">raw_document_1</span><span class="o">=</span><span class="n">premises</span><span class="p">,</span> <span class="n">raw_documents_2</span><span class="o">=</span><span class="n">hypotheses</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Okidoki, now we have everything together to do some advanced model debugging :).</p>
+<div class="highlight"><pre><span></span><span class="n">prem_b4_pool</span><span class="p">,</span> <span class="n">hypo_b4_pool</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_representations_before_pooling</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="n">prem_after_pool</span><span class="p">,</span> <span class="n">hypo_after_pool</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_representations_after_pooling</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="c1"># Print their shapes</span>
+<span class="k">print</span><span class="p">(</span><span class="n">prem_b4_pool</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">prem_after_pool</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Output</span>
+<span class="c1"># torch.Size([2, 8, 600]) torch.Size([2, 600])</span>
+
+<span class="c1"># For the representation before pooling we said we were just going to use the final state</span>
+<span class="n">prem_b4_pool</span> <span class="o">=</span> <span class="n">prem_b4_pool</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="n">hypo_b4_pool</span> <span class="o">=</span> <span class="n">hypo_b4_pool</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+<span class="c1"># And now we throw everything into numpy arrays, because we like numpy arrays</span>
+<span class="n">P_b4_pool</span> <span class="o">=</span> <span class="n">prem_b4_pool</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="n">H_b4_pool</span> <span class="o">=</span> <span class="n">hypo_b4_pool</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="n">P_after_pool</span> <span class="o">=</span> <span class="n">prem_after_pool</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="n">H_after_pool</span> <span class="o">=</span> <span class="n">hypo_after_pool</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+<span class="c1"># So, lets look at the cosines between the contradicting case before and after pooling (remember, in scipy its cosine distance, so cosine similarity = 1 - distance)</span>
+<span class="k">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cosine</span><span class="p">(</span><span class="n">P_b4_pool</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">H_b4_pool</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+<span class="c1"># Output</span>
+<span class="c1"># 0.3818543255329132</span>
+
+<span class="k">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cosine</span><span class="p">(</span><span class="n">P_after_pool</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">H_after_pool</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+<span class="c1"># Output</span>
+<span class="c1"># 0.4067332446575165</span>
+
+<span class="c1"># So pooling has made the two representations slightly more similar. How about the entailment case?</span>
+<span class="k">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cosine</span><span class="p">(</span><span class="n">P_b4_pool</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">H_b4_pool</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+<span class="c1"># Output</span>
+<span class="c1"># 0.6774758696556091</span>
+
+<span class="k">print</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cosine</span><span class="p">(</span><span class="n">P_after_pool</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">H_after_pool</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+<span class="c1"># Output</span>
+<span class="c1"># 0.6271609663963318</span>
+</pre></div>
+
+
+<p>Interestingly, max pooling made the contradiction pair <em>more</em> similar, whereas it made the entailment pair <em>less</em> similar (however in absolute numbers, the entailment pair is much more similar than the contradiction pair).</p>
+<p>Of course this quick example is not terribly informative, however we are now in a position to calculate the nearest neighbours of some cases and measure the effect of pooling by looking how the neighbourhood of individual sentences changes.</p>
+            </div>
+            <!-- /.entry-content -->
+        </article>
+    </section>
+
+        </div>
+    </div>
+</div>
+<!-- End Content Container -->
+
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2019 Thomas Kober
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $("div.collapseheader").click(function () {
+    $header = $(this).children("span").first();
+    $codearea = $(this).children(".input_area");
+    console.log($(this).children());
+    $codearea.slideToggle(500, function () {
+        $header.text(function () {
+            return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+        });
+    });
+});
+});
+</script>
+</body>
+</html>
