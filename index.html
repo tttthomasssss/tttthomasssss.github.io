@@ -176,13 +176,13 @@ init_mathjax();
 <link rel="canonical" href="/pages/about-me.html">
 
         <meta name="author" content="Thomas Kober" />
-        <meta name="description" content="I am currently post-doccing at the University of Edinburgh and I have previously PhDed with focus on Compositional Distributional Semantics at the University of Sussex. See a recent CV here (last updated 23rd July 2019) or feel free to contact me if you have any queries about my work or …" />
+        <meta name="description" content="I am currently post-doccing at the University of Edinburgh, where I focus on building a form-independent semantics for content words. Abstracting away from the surface form of words and focus on their meaning gets us closer to actual natural language understanding. Previously, I have PhDed with focus on Compositional Distributional …" />
 
     <meta property="og:site_name" content="NLP & Me" />
     <meta property="og:type" content="article"/>
     <meta property="og:title" content="About me"/>
     <meta property="og:url" content="/pages/about-me.html"/>
-    <meta property="og:description" content="I am currently post-doccing at the University of Edinburgh and I have previously PhDed with focus on Compositional Distributional Semantics at the University of Sussex. See a recent CV here (last updated 23rd July 2019) or feel free to contact me if you have any queries about my work or …" />
+    <meta property="og:description" content="I am currently post-doccing at the University of Edinburgh, where I focus on building a form-independent semantics for content words. Abstracting away from the surface form of words and focus on their meaning gets us closer to actual natural language understanding. Previously, I have PhDed with focus on Compositional Distributional …" />
 
 
 
@@ -246,15 +246,20 @@ NLP & Me            </a>
         <h1 class="entry-title">About me</h1>
         
         <div class="entry-content">
-            <p>I am currently post-doccing at the University of Edinburgh and I have previously PhDed with focus on Compositional Distributional Semantics at the University of Sussex.</p>
+            <p>I am currently post-doccing at the University of Edinburgh, where I focus on building a form-independent semantics for content words. Abstracting away from the surface form of words and focus on their <em>meaning</em> gets us closer to actual natural language understanding.</p>
+<p>Previously, I have PhDed with focus on Compositional Distributional Semantics at the University of Sussex.</p>
+<p>Language can be fairly weird at times as it lets us refer to the same thing by different words (e.g. buy, purchase, acquire are all - more or less - synonymous in meaning), and to different things with the same word (e.g. bank as in the financial institution vs. bank as the sloping land next to a river). During my PhD I've mostly focused on the latter, and indeed compositional distributional models are pretty good at making these distinctions (see e.g. <a href="/pdfs/papers/Composition_SENSE.pdf" target="_blank">this paper</a>). In my post-doc I am now working on overcoming the issues of the former.</p>
 <p><center>
 <img src="/images/ProfilePicture_small.png" alt="drawing" height="182" width="160"/>
 </center></p>
 <p>See a recent CV <a href="/pdfs/cv.pdf" target="_blank">here</a> (<em>last updated 23rd July 2019</em>) or feel free to <a href="./contact">contact</a> me if you have any queries about my work or want to talk about NLP in general.</p>
 <p>I am currently also co-organising the <a href="https://www.meetup.com/PyData-Edinburgh/" target="_blank">PyData Edinburgh Meetup</a>. If you are interested in giving a main talk or a ligthning talk about something related to data and/or python, please <a href="./contact">get in touch</a>. </p>
 <h2>About my Research</h2>
+<h4>The short version</h4>
+<p>My research is focused on building better natural language understanding systems. My work is based on the combination of distributional semantics, distributional composition and logical semantics to understand and model causation and consequence of actions in text. I furthermore have a strong interest in leveraging unsupervised, semi-supervised and active learning techniques to improve and debug natural language understanding models.</p>
+<h4>The long version</h4>
 <p>My research is focused on building systems that understand natural language. I am particularly interested in modelling <em>causation and consequence</em>. Identifying a change of state for some entities and inferring their consequent state is a pretty tricky problem, that involves <a href="https://en.wikipedia.org/wiki/Tense–aspect–mood" target="_blank">tense, aspect, mood</a>, and all sorts of temporality in general.</p>
-<p>Modelling these fine-grained semantic properties at the word, clause and sentence level is very difficult and pretty much all current models fail to achieve reasonable performance on even a simple dataset (see our recent paper <a href="/pdfs/papers/TemporalAndAspectualEntailment_IWCS.pdf">here</a>).</p>
+<p>Modelling these fine-grained semantic properties at the word, clause and sentence level is very difficult and pretty much all current models fail to achieve reasonable performance on even a simple dataset (see our recent paper <a href="/pdfs/papers/TemporalAndAspectualEntailment_IWCS.pdf" target="_blank">here</a>).</p>
 <p>For example, it sounds reasonable at first to assume that <em>visits</em> entails <em>be at/in</em>, so whenever we encounter the predicate <em>visit</em> we infer that whoever is doing the visiting must also <em>be</em> at that place.</p>
 <p>However, when temporality comes into play, things get a bit more complicated, as <em>Elizabeth will arrive at Pemberley</em> does not entail that she <em>is at</em> Pemberley <em>now</em>.</p>
 <p>Things are also uncertain when we read that <em>Elizabeth had arrived at Pemberley</em>. Its unclear whether she's still there, so all we can infer is that <em>Elizabeth WAS at Pemberley</em> at some point in the past as we could easily add <em>but she left 3 days later</em>.</p>
